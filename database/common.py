@@ -23,13 +23,17 @@ def connectToDb():
              print("Failed to connect to DB")
         else:
             print("Success connecting to DB")
-            return myDb
+            return myDb, myDb.cursor()
         
     except psycopg2.Error as e:
         print(f"Error: {e}")    
 
+def closeConnection(myDb, myDb_cursor):
+    myDb.close()
+
 def dbSetUp():
     exercises = []
+    muscles = []
     
     for dir_name in os.listdir("exercises"):
         print(dir_name)
@@ -38,3 +42,11 @@ def dbSetUp():
             ex = json.load(file)
         exercise = Exercise(ex['name'], ex['force'], ex['level'], ex['mechanic'], ex['equipment'], ex['primaryMuscles'], ex['secondaryMuscles'], ex['instructions'], ex['category'], "a")
         exercises.append(exercise)
+
+        if exercise.primary_muscles not in muscles:
+            muscles.append(exercise.primary_muscles)
+        for muscle in exercise.secondary_muscles:
+            if muscle not in muscles:
+                muscles.append(muscle)
+
+        
