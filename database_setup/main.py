@@ -1,7 +1,6 @@
 import os, json
 import psycopg2
 from dotenv import load_dotenv
-from database.common import *
 
 class Exercise:
     def __init__(self, name, force, level, mechanic, equipment, primary_muscles, secondary_muscles, instructions, category, images_url) -> None:
