@@ -33,8 +33,11 @@ def dbSetUp():
     
     for dir_name in os.listdir("exercises"):
         print(dir_name)
-        print(os.getcwd())
+        # print(os.getcwd())
         with open(os.path.join('exercises', dir_name, 'exercise.json'), 'r', encoding='utf-8') as file:
             ex = json.load(file)
+        
         exercise = Exercise(ex['name'], ex['force'], ex['level'], ex['mechanic'], ex['equipment'], ex['primaryMuscles'], ex['secondaryMuscles'], ex['instructions'], ex['category'], "a")
         exercises.append(exercise)
+
+    # Muscle table first
