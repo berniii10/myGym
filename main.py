@@ -1,7 +1,7 @@
 from database.common import *
 
 def myMain():
-    # connectToDb()
+    myDb, myDb_cursor = connectToDb()
     dbSetUp()
 
 if __name__ == "__main__":
