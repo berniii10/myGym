@@ -48,67 +48,65 @@ def closeConnection(myDb, myDb_cursor):
 
 def addExercise(exercise, myDb_cursor):
     try:
-        # Start a new transaction
-        with myDb_cursor.cursor() as cur:
-            # Check if the exercise with the same name already exists
-            cur.execute("""
-                SELECT id FROM Exercises WHERE name = %s
-            """, (exercise.name,))
-            existing_exercise = cur.fetchone()
+        # Check if the exercise with the same name already exists
+        myDb_cursor.execute("""
+            SELECT id FROM Exercises WHERE name = %s
+        """, (exercise.name,))
+        existing_exercise = myDb_cursor.fetchone()
 
-            if existing_exercise is not None:
-                print(f"Exercise with the name '{exercise.name}' already exists with ID: {existing_exercise[0]}")
-                return existing_exercise[0]
+        if existing_exercise is not None:
+            print(f"Exercise with the name '{exercise.name}' already exists with ID: {existing_exercise[0]}")
+            return existing_exercise[0]
 
-            # Step 1: Insert into Exercises table and return the new exercise_id
-            cur.execute("""
-                INSERT INTO Exercises (name, force, level, mechanic, equipment, category, image_url)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                RETURNING id
-            """, (exercise.name, exercise.force, exercise.level, exercise.mechanic, exercise.equipment, exercise.category, exercise.image_url))
+        # Step 1: Insert into Exercises table and return the new exercise_id
+        myDb_cursor.execute("""
+            INSERT INTO Exercises (name, force, level, mechanic, equipment, category, image_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (exercise.name, exercise.force, exercise.level, exercise.mechanic, exercise.equipment, exercise.category, exercise.images_url))
+        
+        exercise_id = myDb_cursor.fetchone()[0]
+
+        # Add the muscle id for primary
+        for muscle in exercise.primary_muscles:
+            myDb_cursor.execute("""
+                SELECT id from muscles where name = %s
+            """, (muscle,))  # Assuming primaryMuscles list has at least one muscle
             
-            exercise_id = cur.fetchone()[0]
+            muscle_id = myDb_cursor.fetchone()
 
-            # Add the muscle id for primary
-            for muscle in exercise.primary_muscles:
-                cur.execute("""
-                    SELECT id from muscles where name = %s
-                """, (muscle,))  # Assuming primaryMuscles list has at least one muscle
-                
-                muscle_id = cur.fetchone()
+            myDb_cursor.execute("""
+                INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
+                VALUES (%s, %s, %s)
+            """, (exercise_id, muscle_id, 'primary'))
 
-                cur.execute("""
-                    INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
-                    VALUES (%s, %s, %s)
-                """, (exercise_id, muscle_id, 'primary'))
+        # Add the muscle id for secondary
+        for muscle in exercise.secondary_muscles:
+            myDb_cursor.execute("""
+                SELECT id from muscles where name = %s
+            """, (muscle,))  # Assuming primaryMuscles list has at least one muscle
+            
+            muscle_id = myDb_cursor.fetchone()
+            myDb_cursor.execute("""
+                INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
+                VALUES (%s, %s, %s)
+            """, (exercise_id, muscle_id, 'secondary'))
 
-            # Add the muscle id for secondary
-            for muscle in exercise.secondary_muscles:
-                cur.execute("""
-                    SELECT id from muscles where name = %s
-                """, (muscle,))  # Assuming primaryMuscles list has at least one muscle
-                
-                muscle_id = cur.fetchone()
-                cur.execute("""
-                    INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
-                    VALUES (%s, %s, %s)
-                """, (exercise_id, muscle_id, 'secondary'))
+        # Step 5: Insert into Instructions table
+        instructions = exercise.instructions
+        for step_number, description in enumerate(instructions, 1):
+            myDb_cursor.execute("""
+                INSERT INTO Instructions (exercise_id, step_number, description)
+                VALUES (%s, %s, %s)
+            """, (exercise_id, step_number, description))
 
-            # Step 5: Insert into Instructions table
-            instructions = exercise.instructions
-            for step_number, description in enumerate(instructions, 1):
-                cur.execute("""
-                    INSERT INTO Instructions (exercise_id, step_number, description)
-                    VALUES (%s, %s, %s)
-                """, (exercise_id, step_number, description))
-
-            return exercise_id
+        return exercise_id
 
     except Exception as e:
         # Rollback the transaction if any error occurs
-        myDb_cursor.rollback()
+        # myDb_cursor.rollback()
         print(f"An error occurred: {e}")
-        return None
+        return -1
 
 def addMuscle(muscle, cur):
     cur.execute("""
@@ -136,7 +134,7 @@ def dbSetUp(myDb_connection, myDb_cursor):
         with open(os.path.join(code_path, 'exercises', dir_name, 'exercise.json'), 'r', encoding='utf-8') as file:
             ex = json.load(file)
         
-        exercise = Exercise(ex['name'], ex['force'], ex['level'], ex['mechanic'], ex['equipment'], ex['primaryMuscles'], ex['secondaryMuscles'], ex['instructions'], ex['category'], "a")
+        exercise = Exercise(ex['name'], ex['force'], ex['level'], ex['mechanic'], ex['equipment'], ex['primaryMuscles'], ex['secondaryMuscles'], ex['instructions'], ex['category'], os.path.join('exercises_images', dir_name))
         exercises.append(exercise)      
 
         for muscle in muscles:
@@ -148,17 +146,22 @@ def dbSetUp(myDb_connection, myDb_cursor):
     
     print("Inserting muscles into DB")
     for muscle in muscles:
-        addMuscle(muscle, myDb_cursor)
+        if addMuscle(muscle, myDb_cursor) == -1:
+            return -1
         myDb_connection.commit()
 
     print("Inserting exercises into DB")
-    for exercise in exercises:
-        addExercise(exercise, myDb_cursor)
+    for i, exercise in enumerate(exercises):
+        if addExercise(exercise, myDb_cursor) == -1:
+            return -1
         myDb_connection.commit()
+
+    return 1
 
 def myMain():
     myDb_connection, myDb_cursor = connectToDb()
-    dbSetUp(myDb_connection, myDb_cursor)
+    if dbSetUp(myDb_connection, myDb_cursor) == 1:
+        print("Database loaded correctly")
 
 if __name__ == "__main__":
     myMain()
