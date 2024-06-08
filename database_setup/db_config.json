@@ -2,7 +2,7 @@
     "user": "postgres",
     "password": "XXX",
     "host": "localhost",
-    "database": "postgres",
+    "database": "myGym",
     "port": 5432,
     "connect_timeout": 100
 }
