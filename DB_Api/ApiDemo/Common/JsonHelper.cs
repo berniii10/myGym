@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace ApiDemo.Data
+namespace ApiDemo.Common
 {
     public static class JsonHelper
     {
