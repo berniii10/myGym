@@ -119,7 +119,7 @@ def addMuscle(muscle, cur):
             INSERT INTO muscles (name)
             VALUES (%s)
         """, (muscle,))
-        print("Muscle added")
+        print(f"Muscle {muscle} added")
     else:
         print("Muscle already exists")
 
@@ -135,7 +135,7 @@ def dbSetUp(myDb_connection, myDb_cursor):
             ex = json.load(file)
         
         exercise = Exercise(ex['name'], ex['force'], ex['level'], ex['mechanic'], ex['equipment'], ex['primaryMuscles'], ex['secondaryMuscles'], ex['instructions'], ex['category'], os.path.join('exercises_images', dir_name))
-        exercises.append(exercise)      
+        exercises.append(exercise)
 
         for muscle in muscles:
             if muscle not in muscles:
