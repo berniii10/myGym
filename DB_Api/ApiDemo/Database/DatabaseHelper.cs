@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Npgsql;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -6,26 +6,18 @@ namespace ApiDemo.Database
 {
     public class DatabaseHelper
     {
-        // Database connection parameters
-        private string server;
-        private string database;
-        private string userId;
-        private string password;
-
+        // Database connection string
         private readonly string _connectionString;
 
         // SqlConnection object
-        private SqlConnection connection;
+        private NpgsqlConnection connection;
 
         // Constructor to initialize the parameters
-        public DatabaseHelper(IConfiguration configuration, string server, string database, string userId, string password)
+        public DatabaseHelper()
         {
-            this.server = server;
-            this.database = database;
-            this.userId = userId;
-            this.password = password;
+            _connectionString = File.ReadAllText("Database/db_config.cf");
 
-            _connectionString = configuration.GetConnectionString("DefaultConnection");
+            Connect();
         }
 
         // Method to establish a connection to the database
@@ -33,8 +25,7 @@ namespace ApiDemo.Database
         {
             if (connection == null)
             {
-                string connectionString = $"Server={server};Database={database};User Id={userId};Password={password};";
-                connection = new SqlConnection(connectionString);
+                connection = new NpgsqlConnection(this._connectionString);
             }
 
             if (connection.State != ConnectionState.Open)
@@ -72,9 +63,9 @@ namespace ApiDemo.Database
                     throw new InvalidOperationException("Connection must be open to execute queries.");
                 }
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                using (NpgsqlCommand command = new NpgsqlCommand(query, connection))
                 {
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
                     {
                         adapter.Fill(dataTable);
                     }
