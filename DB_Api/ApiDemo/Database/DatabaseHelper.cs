@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Microsoft.Extensions.Configuration;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace ApiDemo.Database
@@ -11,16 +12,20 @@ namespace ApiDemo.Database
         private string userId;
         private string password;
 
+        private readonly string _connectionString;
+
         // SqlConnection object
         private SqlConnection connection;
 
         // Constructor to initialize the parameters
-        public DatabaseHelper(string server, string database, string userId, string password)
+        public DatabaseHelper(IConfiguration configuration, string server, string database, string userId, string password)
         {
             this.server = server;
             this.database = database;
             this.userId = userId;
             this.password = password;
+
+            _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         // Method to establish a connection to the database
