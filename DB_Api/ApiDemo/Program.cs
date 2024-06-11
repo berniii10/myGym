@@ -1,3 +1,4 @@
+using ApiDemo.Database;
 using ApiDemo.Models;
 using ApiDemo.Services;
 using System.Reflection;
@@ -11,27 +12,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-    var dataService = new DataService();
-    Model? model = null;
-    if (dataService.loadData(ref model))
-    {
-        if (model != null) // It will never be null because it is tested in loadData, but it is also to get rid of warnings
-        {
-            builder.Services.AddSingleton(new ModelService(model));
-        }
-        else
-        {
-            // Handle case where model is null
-            // Throw an exception and terminate the application
-            throw new Exception("Error: Loaded model is null.");
-        }
-    }
-    else
-    {
-        // Handle case where data loading fails
-        // Throw an exception and terminate the application
-        throw new Exception("Error: Failed to load model data.");
-    }
+    builder.Services.AddSingleton(new DatabaseHelper());
 
     var app = builder.Build();
 
