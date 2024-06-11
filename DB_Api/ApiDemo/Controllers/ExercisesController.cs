@@ -1,6 +1,7 @@
 ﻿using ApiDemo.Models;
 using ApiDemo.Services;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ApiDemo.Controllers
 {
@@ -9,21 +10,26 @@ namespace ApiDemo.Controllers
     public class ExercisesController : ControllerBase
     {
 
-        public ExercisesController()
+        private readonly ExercisesService exercisesService;
+
+        public ExercisesController(ExercisesService _exercisesService)
         {
+            this.exercisesService = _exercisesService;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            Model model = new Model();
-            if (true)
+            List<Exercise> exercises = new List<Exercise>();
+            string error = null;
+
+            if (exercisesService.getAllExercises(ref exercises, ref error) == true)
             {
-                return Ok(new { Model = model, Status = "OK" });
+                return Ok(new { Exercises = exercises, Status = "OK" });
             }
             else
             {
-                return NotFound(new { Message = "Movies = null", Status = "OK" });
+                return NotFound(new { Message = error, Status = "OK" });
             }
         }
 
@@ -31,10 +37,12 @@ namespace ApiDemo.Controllers
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            Movie movie = new Movie();
-            if (true)
+            Exercise exercise = new Exercise();
+            string error = null;
+
+            if (exercisesService.getExercise(id, ref exercise, ref error) == true)
             {
-                return Ok(new { Movie = movie, Status = "OK" });
+                return Ok(new { Exercise = exercise, Status = "OK" });
             }
             else
             {
