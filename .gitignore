@@ -1,6 +1,7 @@
 # My own
 .env
 exercises
+exercises_images
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
