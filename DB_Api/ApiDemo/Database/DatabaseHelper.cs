@@ -81,7 +81,7 @@ namespace ApiDemo.Database
             return dataTable;
         }
 
-        public getExercise(int id, ref Exercise exercise, ref string error)
+        public bool getExercise(int id, ref Exercise exercise, ref string error)
         {
             try
             {
@@ -111,7 +111,7 @@ namespace ApiDemo.Database
                         {
                             if (exercise == null)
                             {
-                                exercise = new ExerciseDetail
+                                exercise = new Exercise
                                 {
                                     Id = reader.GetInt32(0),
                                     Name = reader.GetString(1),
@@ -131,7 +131,7 @@ namespace ApiDemo.Database
                                     StepNumber = reader.GetInt32(8),
                                     Description = reader.GetString(9)
                                 };
-                                exerciseDetail.Instructions.Add(instruction);
+                                exercise.Instructions.Add(instruction);
                             }
 
                             if (!reader.IsDBNull(10))
@@ -145,11 +145,11 @@ namespace ApiDemo.Database
 
                                 if (muscle.Type == "primary")
                                 {
-                                    exerciseDetail.PrimaryMuscles.Add(muscle);
+                                    exercise.PrimaryMuscles.Add(muscle);
                                 }
                                 else if (muscle.Type == "secondary")
                                 {
-                                    exerciseDetail.SecondaryMuscles.Add(muscle);
+                                    exercise.SecondaryMuscles.Add(muscle);
                                 }
                             }
                         }
@@ -159,8 +159,10 @@ namespace ApiDemo.Database
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
+                return false;
             }
 
+            return true;
         }
     }
 }

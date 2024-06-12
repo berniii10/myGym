@@ -52,7 +52,7 @@ namespace ApiDemo.Controllers
 
         // POST api/<MoviesController>
         [HttpPost]
-        public IActionResult Post([FromBody] Movie movie)
+        public IActionResult Post([FromBody] Exercise exercise)
         {
             if (true)
             {
@@ -66,7 +66,7 @@ namespace ApiDemo.Controllers
 
         // PUT api/<MoviesController>/
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] Movie movie)
+        public IActionResult Put(int id, [FromBody] Exercise exercise)
         {
             if (true)
             {

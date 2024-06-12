@@ -14,7 +14,7 @@
         public List<Muscle> PrimaryMuscles { get; set; }
         public List<Muscle> SecondaryMuscles { get; set; }
 
-        public ExerciseDetail()
+        public Exercise()
         {
             Instructions = new List<Instruction>();
             PrimaryMuscles = new List<Muscle>();
