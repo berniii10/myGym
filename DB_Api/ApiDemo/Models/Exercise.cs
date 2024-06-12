@@ -2,23 +2,23 @@
 {
     public class Exercise
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Force { get; set; }
-        public string Level { get; set; }
-        public string Mechanic { get; set; }
-        public string Equipment { get; set; }
-        public string Category { get; set; }
-        public string ImageUrl { get; set; }
-        public List<Instruction> Instructions { get; set; }
-        public List<Muscle> PrimaryMuscles { get; set; }
-        public List<Muscle> SecondaryMuscles { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public string? force { get; set; }
+        public string? level { get; set; }
+        public string? mechanic { get; set; }
+        public string? equipment { get; set; }
+        public string? category { get; set; }
+        public string? image_url { get; set; }
+        public List<Instruction> instructions { get; set; }
+        public List<Muscle> primary_muscles { get; set; }
+        public List<Muscle>? secondary_muscles { get; set; }
 
         public Exercise()
         {
-            Instructions = new List<Instruction>();
-            PrimaryMuscles = new List<Muscle>();
-            SecondaryMuscles = new List<Muscle>();
+            instructions = new List<Instruction>();
+            primary_muscles = new List<Muscle>();
+            secondary_muscles = new List<Muscle>();
         }
     }
 }

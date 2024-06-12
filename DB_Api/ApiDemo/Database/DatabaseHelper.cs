@@ -2,6 +2,8 @@
 using Npgsql;
 using System.Data;
 using System.Data.SqlClient;
+using System.Reflection.Emit;
+using System.Xml.Linq;
 
 namespace ApiDemo.Database
 {
@@ -85,11 +87,14 @@ namespace ApiDemo.Database
         {
             try
             {
+                // Ensure the connection is open
                 if (connection == null || connection.State != ConnectionState.Open)
                 {
-                    throw new InvalidOperationException("Connection must be open to execute queries.");
+                    error = "Connection must be open to execute queries.";
+                    return false;
                 }
 
+                // Define the query
                 string query = @"
                     SELECT e.id, e.name, e.force, e.level, e.mechanic, e.equipment, e.category, e.image_url,
                            i.step_number, i.description,
@@ -103,27 +108,30 @@ namespace ApiDemo.Database
 
                 using (var command = new NpgsqlCommand(query, connection))
                 {
+                    // Add parameter to the command
                     command.Parameters.AddWithValue("@exerciseId", id);
 
                     using (var reader = command.ExecuteReader())
                     {
+                        // Process the result set
                         while (reader.Read())
                         {
+                            // Initialize the exercise object if it hasn't been initialized
                             if (exercise == null)
                             {
-                                exercise = new Exercise
-                                {
-                                    Id = reader.GetInt32(0),
-                                    Name = reader.GetString(1),
-                                    Force = reader.GetString(2),
-                                    Level = reader.GetString(3),
-                                    Mechanic = reader.GetString(4),
-                                    Equipment = reader.GetString(5),
-                                    Category = reader.GetString(6),
-                                    ImageUrl = reader.IsDBNull(7) ? null : reader.GetString(7)
-                                };
+                                exercise = new Exercise();
                             }
 
+                            exercise.id = reader.GetInt32(0);
+                            exercise.name = reader.GetString(1);
+                            exercise.force = reader.IsDBNull(2) ? null : reader.GetString(2);
+                            exercise.level = reader.IsDBNull(3) ? null : reader.GetString(3);
+                            exercise.mechanic = reader.IsDBNull(4) ? null : reader.GetString(4);
+                            exercise.equipment = reader.IsDBNull(5) ? null : reader.GetString(5);
+                            exercise.category = reader.IsDBNull(6) ? null : reader.GetString(6);
+                            exercise.image_url = reader.IsDBNull(7) ? null : reader.GetString(7);
+
+                            // Add instructions if they exist
                             if (!reader.IsDBNull(8))
                             {
                                 var instruction = new Instruction
@@ -131,9 +139,11 @@ namespace ApiDemo.Database
                                     StepNumber = reader.GetInt32(8),
                                     Description = reader.GetString(9)
                                 };
-                                exercise.Instructions.Add(instruction);
+
+                                exercise.instructions.Add(instruction);
                             }
 
+                            // Add muscles if they exist
                             if (!reader.IsDBNull(10))
                             {
                                 var muscle = new Muscle
@@ -143,13 +153,13 @@ namespace ApiDemo.Database
                                     Type = reader.GetString(12)
                                 };
 
-                                if (muscle.Type == "primary")
+                                if (muscle.Type.Equals("primary", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    exercise.PrimaryMuscles.Add(muscle);
+                                    exercise.primary_muscles.Add(muscle);
                                 }
-                                else if (muscle.Type == "secondary")
+                                else if (muscle.Type.Equals("secondary", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    exercise.SecondaryMuscles.Add(muscle);
+                                    exercise.secondary_muscles.Add(muscle);
                                 }
                             }
                         }
@@ -159,6 +169,7 @@ namespace ApiDemo.Database
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
+                error = ex.Message;
                 return false;
             }
 

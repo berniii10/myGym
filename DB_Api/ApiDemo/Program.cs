@@ -14,6 +14,8 @@ try
 
     builder.Services.AddSingleton(new DatabaseHelper());
 
+    builder.Services.AddSingleton<ExercisesService>();
+
     var app = builder.Build();
 
     // Configure the HTTP request pipeline.

@@ -60,7 +60,7 @@ namespace ApiDemo.Controllers
             }
             else
             {
-                return Conflict(new { Message = "Movie already exists or there is a movie with that ID.", ID = movie.Id, ExistingMovie = movie, Status = "OK" });
+                return Conflict(new { Message = "Movie already exists or there is a movie with that ID.", ID = exercise.id, ExistingExercise = exercise, Status = "OK" });
             }
         }
 
