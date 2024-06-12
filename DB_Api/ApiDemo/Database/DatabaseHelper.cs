@@ -83,10 +83,11 @@ namespace ApiDemo.Database
             return dataTable;
         }
 
-        public bool getExercise(int id, ref Exercise exercise, ref string error)
+        public bool getExerciseById(int id, ref Exercise exercise, ref string error)
         {
             try
             {
+                List<Muscle> muscles = new List<Muscle>();
                 // Ensure the connection is open
                 if (connection == null || connection.State != ConnectionState.Open)
                 {
@@ -96,15 +97,9 @@ namespace ApiDemo.Database
 
                 // Define the query
                 string query = @"
-                    SELECT e.id, e.name, e.force, e.level, e.mechanic, e.equipment, e.category, e.image_url,
-                           i.step_number, i.description,
-                           m.id AS muscle_id, m.name AS muscle_name, em.type
-                    FROM exercises e
-                    LEFT JOIN instructions i ON e.id = i.exercise_id
-                    LEFT JOIN exercisemuscles em ON e.id = em.exercise_id
-                    LEFT JOIN muscles m ON em.muscle_id = m.id
-                    WHERE e.id = @exerciseId
-                    ORDER BY e.id, i.step_number, em.type";
+                    SELECT id, name, force, level, mechanic, equipment, category, image_url
+                    FROM exercises
+                    WHERE id = @exerciseId";
 
                 using (var command = new NpgsqlCommand(query, connection))
                 {
@@ -113,6 +108,12 @@ namespace ApiDemo.Database
 
                     using (var reader = command.ExecuteReader())
                     {
+                        if (!reader.HasRows)
+                        {
+                            error = "There are no rows for this exercise ID";
+                            return false;
+                        }
+
                         // Process the result set
                         while (reader.Read())
                         {
@@ -130,41 +131,52 @@ namespace ApiDemo.Database
                             exercise.equipment = reader.IsDBNull(5) ? null : reader.GetString(5);
                             exercise.category = reader.IsDBNull(6) ? null : reader.GetString(6);
                             exercise.image_url = reader.IsDBNull(7) ? null : reader.GetString(7);
-
-                            // Add instructions if they exist
-                            if (!reader.IsDBNull(8))
-                            {
-                                var instruction = new Instruction
-                                {
-                                    StepNumber = reader.GetInt32(8),
-                                    Description = reader.GetString(9)
-                                };
-
-                                exercise.instructions.Add(instruction);
-                            }
-
-                            // Add muscles if they exist
-                            if (!reader.IsDBNull(10))
-                            {
-                                var muscle = new Muscle
-                                {
-                                    Id = reader.GetInt32(10),
-                                    Name = reader.GetString(11),
-                                    Type = reader.GetString(12)
-                                };
-
-                                if (muscle.Type.Equals("primary", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    exercise.primary_muscles.Add(muscle);
-                                }
-                                else if (muscle.Type.Equals("secondary", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    exercise.secondary_muscles.Add(muscle);
-                                }
-                            }
                         }
                     }
                 }
+
+                string query_for_muscles = @"
+                    SELECT m.id, m.name, em.type
+                    FROM exercisemuscles em JOIN muscles m ON em.muscle_id = m.id
+                    WHERE em.exercise_id = @exerciseId;";
+
+                using (var command = new NpgsqlCommand(query, connection))
+                {
+                    // Add parameter to the command
+                    command.Parameters.AddWithValue("@exerciseId", id);
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (!reader.HasRows)
+                        {
+                            error = "No muscles found for the given exercise ID.";
+                            return false;
+                        }
+
+                        while (reader.Read())
+                        {
+                            Muscle muscle = new Muscle
+                            {
+                                Id = reader.GetInt32(0),
+                                Name = reader.GetString(1),
+                                Type = reader.GetString(2)
+                            };
+                        }
+                    }
+                }
+
+                foreach (Muscle muscle in muscles)
+                {
+                    if (muscle.Type.Equals("primary"))
+                    {
+                        exercise.primary_muscles.Add(muscle);
+                    }
+                    else if (muscle.Type.Equals("secondary"))
+                    {
+                        exercise.secondary_muscles.Add(muscle);
+                    }
+                }
+
             }
             catch (Exception ex)
             {
