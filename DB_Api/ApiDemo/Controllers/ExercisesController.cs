@@ -10,20 +10,20 @@ namespace ApiDemo.Controllers
     public class ExercisesController : ControllerBase
     {
 
-        private readonly ExercisesService exercisesService;
+        private readonly ExercisesService exercises_service;
 
         public ExercisesController(ExercisesService _exercisesService)
         {
-            this.exercisesService = _exercisesService;
+            this.exercises_service = _exercisesService;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
             List<Exercise> exercises = new List<Exercise>();
-            string error = null;
+            string error = "";
 
-            if (exercisesService.getAllExercises(ref exercises, ref error) == true)
+            if (exercises_service.getAllExercises(ref exercises, ref error) == true)
             {
                 return Ok(new { Exercises = exercises, Status = "OK" });
             }
@@ -33,14 +33,14 @@ namespace ApiDemo.Controllers
             }
         }
 
-        // GET api/MoviesController
+        // GET api/exercises/id
         [HttpGet("id/{id}")]
         public IActionResult Get(int id)
         {
             Exercise exercise = new Exercise();
             string error = null;
 
-            if (exercisesService.getExerciseById(id, ref exercise, ref error) == true)
+            if (exercises_service.getExerciseById(id, ref exercise, ref error) == true)
             {
                 return Ok(new { Exercise = exercise, Status = "OK" });
             }
@@ -50,6 +50,7 @@ namespace ApiDemo.Controllers
             }
         }
 
+        // GET api/exercises/name
         [HttpGet("name/{name}")]
         public IActionResult Get(string name)
         {
@@ -57,7 +58,7 @@ namespace ApiDemo.Controllers
             string error = null;
             string _name = Uri.UnescapeDataString(name);
 
-            if (exercisesService.getExerciseByName(_name, ref exercise, ref error) == true)
+            if (exercises_service.getExerciseByName(_name, ref exercise, ref error) == true)
             {
                 return Ok(new { Exercise = exercise, Status = "OK" });
             }
@@ -67,17 +68,19 @@ namespace ApiDemo.Controllers
             }
         }
 
-        // POST api/<MoviesController>
+        // POST api/exercises
         [HttpPost]
         public IActionResult Post([FromBody] Exercise exercise)
         {
-            if (true)
+            string error = "";
+
+            if (exercises_service.addExercise(exercise, ref error) == true)
             {
-                return Ok(new { Message = "Movie Added.", Status = "OK" });
+                return Ok(new { Message = "Exercise Added.", Status = "OK" });
             }
             else
             {
-                return Conflict(new { Message = "Movie already exists or there is a movie with that ID.", ID = exercise.id, ExistingExercise = exercise, Status = "OK" });
+                return Conflict(new { Message = "Exercise already exists or there is an exercise with that name.", ID = exercise.id, Name = exercise.name, ExistingExercise = exercise, Status = "OK" });
             }
         }
 
