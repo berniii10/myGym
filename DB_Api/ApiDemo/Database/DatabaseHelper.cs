@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Reflection.Emit;
 using System.Xml.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ApiDemo.Database
 {
@@ -55,7 +56,7 @@ namespace ApiDemo.Database
         }
 
         // Method to execute a generic query
-        public DataTable? ExecuteQuery(string query)
+        private bool executeQuery(string query, ref DataTable? result_table, ref string error)
         {
             DataTable dataTable = new DataTable();
 
@@ -76,11 +77,60 @@ namespace ApiDemo.Database
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"An error occurred: {ex.Message}");
-                return null;
+                error = $"An error occurred: {ex.Message}";
+                return false;
             }
 
-            return dataTable;
+            result_table = dataTable;
+            return true;
+        }
+
+        public bool getAllExercisesIds(ref List<int> ids, ref string error)
+        {
+            DataTable result_table = null;
+
+            // Define the query
+            string query = @"SELECT id from exercises e;";
+            
+            if (executeQuery(query, ref result_table, ref error) == true && result_table != null)
+            {
+                foreach (DataRow row in result_table.Rows)
+                {
+                    ids.Add((int)row["id"]);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool getAllExercises(ref List<Exercise> exercises, ref string error)
+        {
+            Exercise exercise = new Exercise();
+            List<int> ids = new List<int>();
+            exercises = new List<Exercise>();
+
+            if (getAllExercisesIds(ref ids, ref error) == true)
+            {
+                foreach (int id in ids)
+                {
+                    if (getExercise(id, null, ref exercise, ref error) == true)
+                    {
+                        exercises.Add(exercise);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public bool getExercise(int? id, string? name, ref Exercise exercise, ref string error)
@@ -235,8 +285,9 @@ namespace ApiDemo.Database
                     {
                         if (!reader.HasRows)
                         {
-                            error = "No instructions found for the given exercise ID.";
-                            return false;
+                            // Should do something if there are no instructions?
+                            //error = "No instructions found for the given exercise ID.";
+                            //return false;
                         }
 
                         while (reader.Read())

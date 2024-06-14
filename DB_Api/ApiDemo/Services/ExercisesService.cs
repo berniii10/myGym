@@ -12,9 +12,13 @@ namespace ApiDemo.Services
             databaseHelper = _databaseHelper;
         }
 
-        public bool getAllExercises(ref List<Exercise> exercises, ref string? error)
+        public bool getAllExercises(ref List<Exercise> exercises, ref string error)
         {
-            return true;
+            if (databaseHelper.getAllExercises(ref exercises, ref error) == true)
+            {
+                return true;
+            }
+            return false;
         }
 
         public bool getExerciseById(int id, ref Exercise exercise, ref string error)

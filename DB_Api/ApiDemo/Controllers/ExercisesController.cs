@@ -21,7 +21,7 @@ namespace ApiDemo.Controllers
         public IActionResult Get()
         {
             List<Exercise> exercises = new List<Exercise>();
-            string error = null;
+            string error = "";
 
             if (exercisesService.getAllExercises(ref exercises, ref error) == true)
             {
