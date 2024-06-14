@@ -72,13 +72,15 @@ namespace ApiDemo.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] Exercise exercise)
         {
-            if (exercises_service addExercise() == true)
+            string error = "";
+
+            if (exercises_service.addExercise(exercise, ref error) == true)
             {
-                return Ok(new { Message = "Movie Added.", Status = "OK" });
+                return Ok(new { Message = "Exercise Added.", Status = "OK" });
             }
             else
             {
-                return Conflict(new { Message = "Movie already exists or there is a movie with that ID.", ID = exercise.id, ExistingExercise = exercise, Status = "OK" });
+                return Conflict(new { Message = "Exercise already exists or there is an exercise with that name.", ID = exercise.id, Name = exercise.name, ExistingExercise = exercise, Status = "OK" });
             }
         }
 
