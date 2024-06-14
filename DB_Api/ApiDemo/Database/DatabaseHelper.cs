@@ -83,11 +83,12 @@ namespace ApiDemo.Database
             return dataTable;
         }
 
-        public bool getExerciseById(int id, ref Exercise exercise, ref string error)
+        public bool getExercise(int? id, string? name, ref Exercise exercise, ref string error)
         {
             try
             {
                 List<Muscle> muscles = new List<Muscle>();
+
                 // Ensure the connection is open
                 if (connection == null || connection.State != ConnectionState.Open)
                 {
@@ -99,13 +100,26 @@ namespace ApiDemo.Database
                 string query = @"
                     SELECT id, name, force, level, mechanic, equipment, category, image_url
                     FROM exercises
-                    WHERE id = @exerciseId";
+                    WHERE id = @exerciseSelector";
 
                 using (var command = new NpgsqlCommand(query, connection))
                 {
-                    // Add parameter to the command
-                    command.Parameters.AddWithValue("@exerciseId", id);
-
+                    if (id != null)
+                    {
+                        // Add parameter to the command
+                        command.Parameters.AddWithValue("@exerciseSelector", id);
+                    }
+                    else if (name != null)
+                    {
+                        // Add parameter to the command
+                        command.Parameters.AddWithValue("@exerciseSelector", name);
+                    }
+                    else
+                    {
+                        error = "Both id and name are null";
+                        return false;
+                    }
+                    
                     using (var reader = command.ExecuteReader())
                     {
                         if (!reader.HasRows)
@@ -138,12 +152,25 @@ namespace ApiDemo.Database
                 string query_for_muscles = @"
                     SELECT m.id, m.name, em.type
                     FROM exercisemuscles em JOIN muscles m ON em.muscle_id = m.id
-                    WHERE em.exercise_id = @exerciseId;";
+                    WHERE em.exercise_id = @exerciseSelector;";
 
-                using (var command = new NpgsqlCommand(query, connection))
+                using (var command = new NpgsqlCommand(query_for_muscles, connection))
                 {
-                    // Add parameter to the command
-                    command.Parameters.AddWithValue("@exerciseId", id);
+                    if (id != null)
+                    {
+                        // Add parameter to the command
+                        command.Parameters.AddWithValue("@exerciseSelector", id);
+                    }
+                    else if (name != null)
+                    {
+                        // Add parameter to the command
+                        command.Parameters.AddWithValue("@exerciseSelector", name);
+                    }
+                    else
+                    {
+                        error = "Both id and name are null";
+                        return false;
+                    }
 
                     using (var reader = command.ExecuteReader())
                     {
@@ -161,10 +188,13 @@ namespace ApiDemo.Database
                                 Name = reader.GetString(1),
                                 Type = reader.GetString(2)
                             };
+
+                            muscles.Add(muscle);
                         }
                     }
                 }
 
+                // Save primary and secondary muscles into the Exercise
                 foreach (Muscle muscle in muscles)
                 {
                     if (muscle.Type.Equals("primary"))
@@ -177,6 +207,50 @@ namespace ApiDemo.Database
                     }
                 }
 
+                string query_for_instructions = @"
+                    SELECT step_number, description
+                        FROM instructions
+                        WHERE exercise_id = @exerciseSelector
+                        ORDER BY step_number;";
+
+                using (var command = new NpgsqlCommand(query_for_instructions, connection))
+                {
+                    if (id != null)
+                    {
+                        // Add parameter to the command
+                        command.Parameters.AddWithValue("@exerciseSelector", id);
+                    }
+                    else if (name != null)
+                    {
+                        // Add parameter to the command
+                        command.Parameters.AddWithValue("@exerciseSelector", name);
+                    }
+                    else
+                    {
+                        error = "Both id and name are null";
+                        return false;
+                    }
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        if (!reader.HasRows)
+                        {
+                            error = "No instructions found for the given exercise ID.";
+                            return false;
+                        }
+
+                        while (reader.Read())
+                        {
+                            Instruction instruction = new Instruction
+                            {
+                                StepNumber = reader.GetInt32(0),
+                                Description = reader.GetString(1),
+                            };
+
+                            exercise.instructions.Add(instruction);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {

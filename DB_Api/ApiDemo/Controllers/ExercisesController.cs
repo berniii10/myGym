@@ -34,19 +34,36 @@ namespace ApiDemo.Controllers
         }
 
         // GET api/MoviesController
-        [HttpGet("{id}")]
+        [HttpGet("id/{id}")]
         public IActionResult Get(int id)
         {
             Exercise exercise = new Exercise();
             string error = null;
 
-            if (exercisesService.getExercise(id, ref exercise, ref error) == true)
+            if (exercisesService.getExerciseById(id, ref exercise, ref error) == true)
             {
                 return Ok(new { Exercise = exercise, Status = "OK" });
             }
             else
             {
-                return NotFound(new { Id = id, Message = "Movie not found", Status = "OK" });
+                return NotFound(new { Id = id, Message = "Exercise not found", Status = "OK" });
+            }
+        }
+
+        [HttpGet("name/{name}")]
+        public IActionResult Get(string name)
+        {
+            Exercise exercise = new Exercise();
+            string error = null;
+            string _name = Uri.UnescapeDataString(name);
+
+            if (exercisesService.getExerciseByName(_name, ref exercise, ref error) == true)
+            {
+                return Ok(new { Exercise = exercise, Status = "OK" });
+            }
+            else
+            {
+                return NotFound(new { Name = name, Message = "Exercise not found", Status = "OK" });
             }
         }
 

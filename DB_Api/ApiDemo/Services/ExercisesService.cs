@@ -17,9 +17,18 @@ namespace ApiDemo.Services
             return true;
         }
 
-        public bool getExercise(int id, ref Exercise exercise, ref string error)
+        public bool getExerciseById(int id, ref Exercise exercise, ref string error)
         {
-            if (databaseHelper.getExercise(id, ref exercise, ref error) == true)
+            if (databaseHelper.getExercise(id, null, ref exercise, ref error) == true)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public bool getExerciseByName(string name, ref Exercise exercise, ref string error)
+        {
+            if (databaseHelper.getExercise(null, name, ref exercise, ref error) == true)
             {
                 return true;
             }
