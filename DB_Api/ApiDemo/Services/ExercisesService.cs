@@ -39,17 +39,21 @@ namespace ApiDemo.Services
             return false;
         }
 
-        public bool AddMovie()
+        public bool addExercise(Exercise exercise, ref string error)
         {
-            return true;
+            if (databaseHelper.addExercise(exercise, ref error) == true)
+            {
+                return true;
+            }
+            return false;
         }
 
-        public bool UpdateMovie(int id)
+        public bool UpdateMovie(ref string error)
         {
             return false;
         }
 
-        public bool DeleteMovie(int id)
+        public bool DeleteMovie(ref string error)
         {
             return false;
         }
