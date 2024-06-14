@@ -1,0 +1,30 @@
+name: .NET Core CI
+
+on:
+  push:
+    branches:
+      - '**'  # Matches all branches
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x' # Specify your .NET Core version
+
+      - name: Restore dependencies
+        run: dotnet restore
+        working-directory: ./DB_Api
+
+      - name: Build
+        run: dotnet build --no-restore
+        working-directory: ./DB_Api

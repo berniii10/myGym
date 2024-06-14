@@ -1,11 +1,11 @@
 CREATE TABLE Exercises (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    force TEXT NOT NULL,
-    level TEXT NOT NULL,
-    mechanic TEXT NOT NULL,
-    equipment TEXT NOT NULL,
-    category TEXT NOT NULL,
+    force TEXT,
+    level TEXT,
+    mechanic TEXT,
+    equipment TEXT,
+    category TEXT,
     image_url TEXT
 );
 
@@ -27,10 +27,4 @@ CREATE TABLE Instructions (
     exercise_id INTEGER NOT NULL REFERENCES Exercises(id),
     step_number INTEGER NOT NULL,
     description TEXT NOT NULL
-);
-
-CREATE TABLE ExerciseImages (
-    id SERIAL PRIMARY KEY,
-    exercise_id INTEGER NOT NULL REFERENCES Exercises(id),
-    image_url TEXT NOT NULL
 );

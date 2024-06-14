@@ -1,0 +1,113 @@
+{
+  "movies": [
+    {
+      "id": 0,
+      "title": "Inception",
+      "director": "Christopher Nolan",
+      "release_year": 2010,
+      "genres": [ "Science Fiction", "Thriller" ],
+      "rating": 4.8,
+      "summary": "A thief who enters the dreams of others to steal secrets from their subconscious.",
+      "actors": [
+        {
+          "name": "Leonardo",
+          "last_name": "DiCaprio",
+          "age": 46,
+          "birthday": "November 11, 1974"
+        },
+        {
+          "name": "Joseph",
+          "last_name": "Gordon-Levitt",
+          "age": 40,
+          "birthday": "February 17, 1981"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "title": "The Shawshank Redemption",
+      "director": "Frank Darabont",
+      "release_year": 1994,
+      "genres": [ "Drama", "Crime" ],
+      "rating": 4.9,
+      "summary": "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+      "actors": [
+        {
+          "name": "Tim",
+          "last_name": "Robbins",
+          "age": 62,
+          "birthday": "October 16, 1958"
+        },
+        {
+          "name": "Morgan",
+          "last_name": "Freeman",
+          "age": 84,
+          "birthday": "June 1, 1937"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "The Godfather",
+      "director": "Francis Ford Coppola",
+      "release_year": 1972,
+      "genres": [ "Crime", "Drama" ],
+      "rating": 4.9,
+      "summary": "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.",
+      "actors": [
+        {
+          "name": "Marlon",
+          "last_name": "Brando",
+          "age": 80,
+          "birthday": "April 3, 1924"
+        },
+        {
+          "name": "Al",
+          "last_name": "Pacino",
+          "age": 81,
+          "birthday": "April 25, 1940"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "The Dark Knight",
+      "director": "Christopher Nolan",
+      "release_year": 2008,
+      "genres": [ "Action", "Crime" ],
+      "rating": 4.7,
+      "summary": "The sequel to Batman Begins, featuring Christian Bale as Batman, Heath Ledger as the Joker, and Aaron Eckhart as Harvey Dent.",
+      "actors": [
+        {
+          "name": "Christian",
+          "last_name": "Bale",
+          "age": 47,
+          "birthday": "January 30, 1974"
+        },
+        {
+          "name": "Heath",
+          "last_name": "Ledger",
+          "age": null,
+          "birthday": "April 4, 1979 - January 22, 2008"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Forrest Gump",
+      "director": "Robert Zemeckis",
+      "release_year": 1994,
+      "genres": [ "Drama", "Romance" ],
+      "rating": 4.8,
+      "summary": "The story depicts several decades in the life of Forrest Gump, a slow-witted but kind-hearted man from Alabama who witnesses and unwittingly influences several defining historical events in the 20th century United States.",
+      "actors": [
+        {
+          "name": "Tom",
+          "last_name": "Hanks",
+          "age": 64,
+          "birthday": "July 9, 1956"
+        }
+      ]
+    }
+  ]
+}
