@@ -1,5 +1,6 @@
 ﻿using ApiDemo.Models;
 using Npgsql;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection.Emit;
@@ -316,7 +317,7 @@ namespace ApiDemo.Database
 
             int exercise_id;
 
-            string query_to_check_if_exercise = $@"SELECT id FROM Exercises WHERE name = {exercise.name}";
+            string query_to_check_if_exercise = $@"SELECT id FROM Exercises WHERE LOWER(name) = LOWER('{exercise.name}')";
 
             if (executeQuery(query_to_check_if_exercise, ref result_table, ref error) == true)
             {
@@ -331,7 +332,8 @@ namespace ApiDemo.Database
                 // Validate that the muscle exists
                 foreach (var muscle in exercise.primary_muscles)
                 {
-                    query_for_muscle = $@"SELECT id FROM muscles WHERE name = {muscle}";
+                    query_for_muscle = $@"SELECT * FROM muscles WHERE id = {muscle.Id}";
+                    result_table.Rows.Clear();
                     
                     if (executeQuery(query_for_muscle, ref result_table, ref error) == true)
                     {
@@ -346,7 +348,8 @@ namespace ApiDemo.Database
                 // Validate that the muscle exist
                 foreach (var muscle in exercise.secondary_muscles)
                 {
-                    query_for_muscle = $@"SELECT id FROM muscles WHERE name = {muscle}";
+                    query_for_muscle = $@"SELECT * FROM muscles WHERE id = {muscle.Id}";
+                    result_table.Rows.Clear();
 
                     if (executeQuery(query_for_muscle, ref result_table, ref error) == true)
                     {
@@ -361,73 +364,62 @@ namespace ApiDemo.Database
                 // We can now insert the exercise
                 string query_add_exercise = $@"
                         INSERT INTO Exercises (name, force, level, mechanic, equipment, category, image_url)
-                        VALUES ({exercise.name}, {exercise.force}, {exercise.level}, {exercise.mechanic}, {exercise.equipment}, {exercise.category}, {exercise.image_url})
+                        VALUES ('{exercise.name}', '{exercise.force}', '{exercise.level}', '{exercise.mechanic}', '{exercise.equipment}', '{exercise.category}', '{exercise.image_url}')
                         RETURNING id";
+                result_table.Rows.Clear();
 
                 if (executeQuery(query_add_exercise, ref result_table, ref error) == true)
                 {
                     DataRow row = result_table.Rows[0];
                     exercise_id = (int)row["id"];
 
+                    // Loop through all the muscles
                     foreach (var muscle in exercise.primary_muscles)
                     {
-                        query_for_muscle = $@"SELECT id FROM muscles WHERE name = {muscle}";
+                        string query_to_add_muscle = $@"
+                            INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
+                            VALUES ({exercise_id}, {muscle.Id}, 'primary')";
+                        result_table.Rows.Clear();
 
-                        if (executeQuery(query_for_muscle, ref result_table, ref error) == true)
+                        if (executeQuery(query_to_add_muscle, ref result_table, ref error) == false)
                         {
-                            row = result_table.Rows[0];
-                            var muscle_id= (int)row["id"];
-
-                            if (result_table.Rows.Count == 0)
-                            {
-                                error = "Secondary muscle does not exist, create it before adding the exercise";
-                                return false;
-                            }
-
-                            string query_to_add_muscle = $@"
-                                INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
-                                VALUES ({exercise_id}, {muscle_id}, 'primary')";
-
-                            if (executeQuery(query_to_add_muscle, ref result_table, ref error) == false)
-                            {
-                                return false;
-                            }
-
-                        } else return false;
+                            return false;
+                        }
                     }
 
                     foreach (var muscle in exercise.secondary_muscles)
                     {
-                        query_for_muscle = $@"SELECT id FROM muscles WHERE name = {muscle}";
+                        string query_to_add_muscle = $@"
+                            INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
+                            VALUES ({exercise_id}, {muscle.Id}, 'secondary')";
+                        result_table.Rows.Clear();
 
-                        if (executeQuery(query_for_muscle, ref result_table, ref error) == true)
+                        if (executeQuery(query_to_add_muscle, ref result_table, ref error) == false)
                         {
-                            row = result_table.Rows[0];
-                            var muscle_id = (int)row["id"];
-
-                            if (result_table.Rows.Count == 0)
-                            {
-                                error = "Secondary muscle does not exist, create it before adding the exercise";
-                                return false;
-                            }
-
-                            string query_to_add_muscle = $@"
-                                INSERT INTO ExerciseMuscles (exercise_id, muscle_id, type)
-                                VALUES ({exercise_id}, {muscle_id}, 'primary')";
-
-                            if (executeQuery(query_to_add_muscle, ref result_table, ref error) == false)
-                            {
-                                return false;
-                            }
-
+                            return false;
                         }
-                        else return false;
+                    }
+
+                    int step = 0;
+                    foreach (var instruction in exercise.instructions)
+                    {
+                        string query_for_instructions = $@"
+                            INSERT INTO Instructions(exercise_id, step_number, description)
+                            VALUES({exercise_id}, '{step.ToString()}', '{instruction}');";
+                        result_table.Rows.Clear();
+
+                        if (executeQuery(query_for_instructions, ref result_table, ref error) == false)
+                        {
+                            return false;
+                        }
+
+                        step++;
                     }
 
                 } else return false;
             } else return false;
         
-            return false;
+            return true;
         }
     }
 }

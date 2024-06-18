@@ -46,7 +46,7 @@ namespace ApiDemo.Controllers
             }
             else
             {
-                return NotFound(new { Id = id, Message = "Exercise not found", Status = "OK" });
+                return NotFound(new { Id = id, Message = error, Status = "OK" });
             }
         }
 
@@ -64,7 +64,7 @@ namespace ApiDemo.Controllers
             }
             else
             {
-                return NotFound(new { Name = name, Message = "Exercise not found", Status = "OK" });
+                return NotFound(new { Name = name, Message = error, Status = "OK" });
             }
         }
 
@@ -80,7 +80,7 @@ namespace ApiDemo.Controllers
             }
             else
             {
-                return Conflict(new { Message = "Exercise already exists or there is an exercise with that name.", ID = exercise.id, Name = exercise.name, ExistingExercise = exercise, Status = "OK" });
+                return Conflict(new { Message = error, ID = exercise.id, Name = exercise.name, ExistingExercise = exercise, Status = "OK" });
             }
         }
 
