@@ -1,4 +1,5 @@
-﻿using ApiDemo.Models;
+﻿using ApiDemo.Common;
+using ApiDemo.Models;
 using Npgsql;
 using System.Collections.Generic;
 using System.Data;
@@ -361,10 +362,14 @@ namespace ApiDemo.Database
                     } else return false;
                 }
 
+                List<int> ids = new List<int>();
+                if (getAllExercisesIds(ref ids, ref error) == false) return false;
+
+                int id = CommonFunctions.getUniqueId(ids);
                 // We can now insert the exercise
                 string query_add_exercise = $@"
-                        INSERT INTO Exercises (name, force, level, mechanic, equipment, category, image_url)
-                        VALUES ('{exercise.name}', '{exercise.force}', '{exercise.level}', '{exercise.mechanic}', '{exercise.equipment}', '{exercise.category}', '{exercise.image_url}')
+                        INSERT INTO Exercises (id, name, force, level, mechanic, equipment, category, image_url)
+                        VALUES ({id}, '{exercise.name}', '{exercise.force}', '{exercise.level}', '{exercise.mechanic}', '{exercise.equipment}', '{exercise.category}', '{exercise.image_url}')
                         RETURNING id";
                 result_table.Rows.Clear();
 
